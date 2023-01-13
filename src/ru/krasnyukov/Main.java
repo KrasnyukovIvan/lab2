@@ -6,23 +6,36 @@ import java.util.*;
 
 public class Main {
 
-    public static final int numberOfElementHasTable = 2000;
-    public static final int maxIterForFindEmptyNode = 15;
-    public static final int stepForFindEmptyNode = 3;
+    public static int numberOfElementHasTable = 2000;
+    public static final int maxIterForFindEmptyCell = 15;
+    public static final int stepForFindEmptyCell = 3;
+    public static final String valueRemoved = "******";
+    public static final String emptyCell = "";
 
     public static void main(String[] args) {
 
         String[] table = new String[numberOfElementHasTable];
 
-        Set<String> set = generatedKeys("ццББцц");
+        Arrays.fill(table, emptyCell);
 
-        Iterator<String> iter = set.iterator();
+        Set<String> keys = generatedKeys("ццББцц");
+
+        Iterator<String> iter = keys.iterator();
         for(int i = 0; i < numberOfElementHasTable; i++) {
             add(table, iter.next());
         }
 
-        saveHashTable(table, "out.txt");
+        saveHashTable(table, "outHashTable.txt");
+        collisionDefinitions(keys, "collision.txt");
 
+        Scanner scanner = new Scanner(System.in);
+        String value = scanner.nextLine();
+
+        System.out.println(findPosition(table, value));
+
+        deleteKey(table, value);
+
+        System.out.println(findPosition(table, value));
     }
 
 
@@ -34,10 +47,10 @@ public class Main {
             StringBuilder key = new StringBuilder();
             Random random = new Random();
 
-            for(int count = 0; count < 4000; count++) {
+            for(int count = 0; count < 40000; count++) {
                 for (int i = 0; i < formatKey.length(); i++) {
                     if (formatKey.charAt(i) == 'ц') {
-                        key.append(random.nextInt(11));
+                        key.append(random.nextInt(10));
                     } else {
                         key.append((char) (random.nextInt(26) + 65));
                     }
@@ -85,12 +98,12 @@ public class Main {
 
     public static boolean add(String[] table, String key){
         int id = hash(key);
-        for(int i = 0; i < maxIterForFindEmptyNode; i++) {
-            id = id + i * stepForFindEmptyNode;
+        for(int i = 0; i < maxIterForFindEmptyCell; i++) {
+            id = id + i * stepForFindEmptyCell;
             if (id >= numberOfElementHasTable) {
                 return false;
             }
-            if (table[id] != "") {
+            if (table[id].equals(emptyCell)) {
                 table[id] = key;
                 return true;
             }
@@ -98,4 +111,55 @@ public class Main {
 
         return false;
     }
+
+    public static void collisionDefinitions(Set<String> keys, String file){
+        try {
+            FileWriter fileWriter = new FileWriter(file, false);
+
+            int[] massiveCollision = new int[numberOfElementHasTable];
+
+            Iterator<String> iter = keys.iterator();
+            for(int i = 0; i < keys.size(); i++) {
+                massiveCollision[hash(iter.next())] += 1;
+            }
+
+            for(int elem : massiveCollision) {
+                fileWriter.write(elem + " \n");
+            }
+
+            fileWriter.flush();
+            fileWriter.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static int findPosition(String[] table, String key) {
+        int id = hash(key);
+        for(int i = 0; i < maxIterForFindEmptyCell; i++) {
+            id = id + i * stepForFindEmptyCell;
+            if (id >=numberOfElementHasTable) {
+                return -1;
+            }
+            if (table[id].equals(key)) {
+                return id;
+            }
+            if (table[id].equals(emptyCell)) {
+                return -1;
+            }
+        }
+
+        return -1;
+    }
+
+    public static boolean deleteKey(String[] table, String key){
+        int id = findPosition(table, key);
+        if (id < 0) {
+            return false;
+        }
+        table[id] = valueRemoved;
+        return true;
+    }
+
 }
