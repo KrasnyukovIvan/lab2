@@ -13,29 +13,64 @@ public class Main {
     public static final String emptyCell = "";
 
     public static void main(String[] args) {
-
         String[] table = new String[numberOfElementHasTable];
-
         Arrays.fill(table, emptyCell);
-
         Set<String> keys = generatedKeys("ццББцц");
+        Iterator<String> iterKeys = keys.iterator();
 
-        Iterator<String> iter = keys.iterator();
-        for(int i = 0; i < numberOfElementHasTable; i++) {
-            add(table, iter.next());
-        }
-
-        saveHashTable(table, "outHashTable.txt");
-        collisionDefinitions(keys, "collision.txt");
+        System.out.println("Для выхода из программы нажмите z\n" +
+                "Для заполнения таблицы ключами - 1\n" +
+                "Для вывода таблицы в файл - 2\n" +
+                "Для формирования файла с коллизией - 3\n" +
+                "Для поиска элемента по значению - 4\n" +
+                "Для удаления элемента по значению - 5\n" +
+                "Для добавления элемента - 6\n");
 
         Scanner scanner = new Scanner(System.in);
-        String value = scanner.nextLine();
+        boolean exit = false;
+        do {
+            String value = scanner.nextLine();
+            switch (value) {
+                case "1" :
+                    for(int i = 0; i < numberOfElementHasTable; i++) {
+                        add(table, iterKeys.next());
+                    }
+                    break;
+                case "2" :
+                    saveHashTable(table, "outHashTable.txt");
+                    break;
+                case "3" :
+                    collisionDefinitions(keys, "collision.txt");
+                    break;
+                case "4" :
+                    System.out.println("Введите значение");
+                    value = scanner.nextLine();
+                    int pos = findPosition(table, value);
+                    if(pos >= 0) {
+                        System.out.println("Позиция элемента - " + pos);
+                    } else {
+                        System.out.println("Элемент не найден");
+                    }
+                    break;
+                case "5" :
+                    System.out.println("Введите значение");
+                    value = scanner.nextLine();
+                    if(deleteKey(table, value)) {
+                        System.out.println("значение " + value + " удалено");
+                    } else {
+                        System.out.println("значение " + value + " не удалено (скорее всего оно отсутствует)");
+                    }
+                    break;
+                case "6" :
+                    System.out.println("Введите значение");
+                    value = scanner.nextLine();
+                    add(table, value);
+                case "z" :
+                    exit = true;
+                    break;
+            }
 
-        System.out.println(findPosition(table, value));
-
-        deleteKey(table, value);
-
-        System.out.println(findPosition(table, value));
+        }while(!exit);
     }
 
 
@@ -98,6 +133,7 @@ public class Main {
 
     public static boolean add(String[] table, String key){
         int id = hash(key);
+
         for(int i = 0; i < maxIterForFindEmptyCell; i++) {
             id = id + i * stepForFindEmptyCell;
             if (id >= numberOfElementHasTable) {
@@ -161,5 +197,4 @@ public class Main {
         table[id] = valueRemoved;
         return true;
     }
-
 }
